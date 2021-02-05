@@ -207,10 +207,10 @@ void compresser(FILE* original, int file_size)
 
 void grave(FILE* original, int16_t* buffer, int file_size)
 {
-	char*buffer_old = buffer;
-	char*buffer_new;
 
-	
+
+
+
 
 }
 
