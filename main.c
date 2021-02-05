@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
-//#include <stdint.h>
+#include <stdint.h>
 #include <math.h>
 #include "main.h"
 
 void copie(FILE* original, int file_size);
 void dilater(FILE* original, int file_size);
 void compresser(FILE* original, int file_size);
+void grave(FILE* original, int16_t* buffer, int file_size);
+
 
 int main()
 {
@@ -167,7 +169,7 @@ void compresser(FILE* original, int file_size)
 
 
 
-		// Duplication de chaque valeur
+		// Supression d'une valeur sur deux
 
 	buffer_new = (int16_t*)malloc(new_file_size*sizeof(int16_t));
 
@@ -203,5 +205,13 @@ void compresser(FILE* original, int file_size)
 
 }
 
+void grave(FILE* original, int16_t* buffer, int file_size)
+{
+	char*buffer_old = buffer;
+	char*buffer_new;
+
+	
+
+}
 
 
