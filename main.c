@@ -7,7 +7,9 @@
 void copie(FILE* original, int file_size);
 void dilater(FILE* original, int file_size);
 void compresser(FILE* original, int file_size);
-void grave(FILE* original, int16_t* buffer, int file_size);
+void grave(int16_t* buffer, int file_size);
+void aigue(int16_t* buffer, int file_size, int new_file_size);
+
 
 
 int main()
@@ -86,6 +88,9 @@ void dilater(FILE* original, int file_size)
 	int* buffer_old;
 	int* buffer_new;
 
+	int count_noise = 0;
+	int count_speech = 0;
+
         FILE* res;
 
 	fseek(original, 44, SEEK_SET);
@@ -130,6 +135,7 @@ void dilater(FILE* original, int file_size)
 	}
 	printf("\n");
 */
+
         fwrite(buffer_new, new_file_size, 1, res);
 
                 //Fermeture des fichiers
@@ -160,12 +166,12 @@ void compresser(FILE* original, int file_size)
         res = fopen("result/compression_attention.raw", "wb");
 
 
-                // Mise en tampon de l'original
+	// Mise en tampon de l'original
 
         buffer_old = (int16_t*)malloc((file_size-44)*sizeof(int16_t));
 
 
-        fread(buffer_old, file_size - 44, 1, original);
+	fread(buffer_old, file_size - 44, 1, original);
 
 
 
@@ -192,6 +198,9 @@ void compresser(FILE* original, int file_size)
 	}
 	printf("\n");
 */
+
+	aigue(buffer_new, file_size, new_file_size);
+
         fwrite(buffer_new, new_file_size, 1, res);
 
 
@@ -205,7 +214,7 @@ void compresser(FILE* original, int file_size)
 
 }
 
-void grave(FILE* original, int16_t* buffer, int file_size)
+void grave(int16_t* buffer, int file_size)
 {
 
 
@@ -214,4 +223,32 @@ void grave(FILE* original, int16_t* buffer, int file_size)
 
 }
 
+void aigue(int16_t* buffer, int file_size, int new_file_size)
+{
+        int16_t* buffer_final = (int16_t*)malloc((file_size-44)*sizeof(int16_t));
+	int j;
+	int k=0;
+
+
+	FILE* final;
+
+        final = fopen("result/aigue.raw", "wb");
+
+	for(int i=0, j=0; i < new_file_size; i=i+441)
+	{
+		for(j=i+k*441; j < i+441; j++)
+		{
+			buffer_final[j] = buffer[i];
+			buffer_final[j+441] = buffer[i];
+		}
+		k++;
+
+	}
+
+        fwrite(buffer_final, file_size-44, 1, final);
+
+	free(buffer_final);
+
+	fclose(final);
+}
 
