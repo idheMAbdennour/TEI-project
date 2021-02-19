@@ -7,7 +7,7 @@
 void copie(FILE* original, int file_size);
 void dilater(FILE* original, int file_size);
 void compresser(FILE* original, int file_size);
-void grave(int16_t* buffer, int file_size);
+void grave(int16_t* buffer, int file_size, int new_file_size);
 void aigue(int16_t* buffer, int file_size, int new_file_size);
 
 
@@ -85,8 +85,8 @@ void dilater(FILE* original, int file_size)
 {
 	int new_file_size = 2 * (file_size - 44);
 
-	int* buffer_old;
-	int* buffer_new;
+	int16_t* buffer_old;
+	int16_t* buffer_new;
 
 	int count_noise = 0;
 	int count_speech = 0;
@@ -103,7 +103,7 @@ void dilater(FILE* original, int file_size)
 
                 // Mise en tampon de l'original
 
-        buffer_old = (int*)malloc((file_size - 44)*sizeof(int));
+        buffer_old = (int16_t*)malloc((file_size - 44)*sizeof(int16_t));
 
 
         fread(buffer_old, file_size - 44, 1, original);
@@ -112,7 +112,7 @@ void dilater(FILE* original, int file_size)
 
 		// Duplication de chaque valeur
 
-	buffer_new = (int*)malloc(new_file_size*sizeof(int));
+	buffer_new = (int16_t*)malloc(new_file_size*sizeof(int16_t));
 
 	for(int i=0, j=0; i < file_size-44; i++, j++)
 	{
@@ -135,6 +135,8 @@ void dilater(FILE* original, int file_size)
 	}
 	printf("\n");
 */
+
+	grave(buffer_new, file_size, new_file_size);
 
         fwrite(buffer_new, new_file_size, 1, res);
 
@@ -214,32 +216,55 @@ void compresser(FILE* original, int file_size)
 
 }
 
-void grave(int16_t* buffer, int file_size)
+void grave(int16_t* buffer, int file_size, int new_file_size)
 {
+	int16_t* buffer_final = (int16_t*)malloc((file_size-44)*sizeof(int16_t));
+	int k=0;
 
+	int p = 1;		// durée d'un segment en ms
 
+	int seg = 44100*p/1000;	//nombre d'échantillon dans un segment de durée p
 
+	FILE* final;
 
+        final = fopen("result/grave.raw", "wb");
 
+	for(int i=0; i < file_size-44-seg; i=i+seg)
+	{
+		for(int j=0; j < seg; j++)
+		{
+			buffer_final[j+i] = (buffer[j+i+seg+k*(seg-1)] + buffer[j+i+seg+k*(seg-1)])/2;
+		}
+		k++;
+
+	}
+
+        fwrite(buffer_final, file_size-44, 1, final);
+
+	free(buffer_final);
+
+	fclose(final);
 }
 
 void aigue(int16_t* buffer, int file_size, int new_file_size)
 {
         int16_t* buffer_final = (int16_t*)malloc((file_size-44)*sizeof(int16_t));
-	int j;
 	int k=0;
 
+	int p = 1;		// durée d'un segment en ms
+
+	int seg = 44100*p/1000;	//nombre d'échantillon dans un segment de durée p
 
 	FILE* final;
 
         final = fopen("result/aigue.raw", "wb");
 
-	for(int i=0, j=0; i < new_file_size; i=i+441)
+	for(int i=0; i < new_file_size-seg; i=i+seg)
 	{
-		for(j=i+k*441; j < i+441; j++)
+		for(int j=0; j < seg; j++)
 		{
-			buffer_final[j] = buffer[i];
-			buffer_final[j+441] = buffer[i];
+			buffer_final[j+i+k*(seg-1)] = buffer[j+i];
+			buffer_final[j+i+seg+k*(seg-1)] = buffer[j+i];
 		}
 		k++;
 
