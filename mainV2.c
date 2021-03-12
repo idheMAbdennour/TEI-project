@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <math.h>
 
-void copie(FILE* original);
+void copie();
 void grave();
 void aigue();
 void file_handle();
@@ -52,13 +52,11 @@ int main()
 		
 }
 
-void copie(FILE* original)
+void copie()
 {   
-    unsigned long file_size = source.Header.FileSize;
-	int16_t* buffer;
+    fichier_wav copie; 
     
-
-    fichier_wav copie;
+    unsigned long file_size = source.Header.FileSize;
 
 
                 // Ouverture des fichiers
