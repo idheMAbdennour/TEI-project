@@ -231,7 +231,7 @@ void grave(int16_t* buffer, int file_size, int new_file_size)
 	{
 		for(int j=0; j < seg; j++)
 		{
-			buffer_final[j+i] = (buffer[j+i+seg+k*(seg-1)] + buffer[j+i+seg+k*(seg-1)])/2;
+			buffer_final[j+i] = (buffer[j+i+k*(seg-1)] + buffer[j+i+seg+k*(seg-1)])/2;
 		}
 		k++;
 

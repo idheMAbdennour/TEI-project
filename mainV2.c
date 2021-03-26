@@ -4,8 +4,12 @@
 #include <math.h>
 
 void copie();
-void grave();
-void aigue();
+void grave8();
+void aigue8();
+void grave16();
+void aigue16();
+void grave32();
+void aigue32();
 void file_handle();
 void slice();
 
@@ -33,7 +37,7 @@ typedef struct
 
     wav_h Header;    
 
-    uint8_t* Data;
+    uint16_t* Data;
     
 }fichier_wav;
 
@@ -61,7 +65,9 @@ int main()
 
 
     
-    copie(source.File);
+    copie();
+
+    grave16();
 
     free(source.Data);
 
@@ -83,6 +89,8 @@ void copie()
                 // Copie
 
     int16_t* buffer = (int16_t*)malloc(file_size);
+
+    fseek(source.File, 0, SEEK_SET);
 
     fread(buffer, file_size, 1, source.File);
 
@@ -106,10 +114,11 @@ void grave8()
     grave.Header = source.Header;
     grave.Data = (uint8_t*)malloc(grave.Header.DataSize);    
 
+    fseek(source.File, 0, SEEK_SET);
 
     		// Duplication de chaque valeur
    
-	uint8_t* buffer = (uint8_t*)malloc(grave.Header.DataSize * 2);
+	uint8_t* buffer = (uint8_t*)malloc((grave.Header.DataSize * 2)*sizeof(uint8_t));
 
 	for(int i=0, j=0; i < grave.Header.DataSize; i++, j++)
 	{
@@ -125,9 +134,9 @@ void grave8()
 
 	int p = 1;		                                // durée d'un segment en ms
 
-	int seg = grave.Header.Frequence*p/1000;	    //nombre d'échantillon dans un segment de durée p  
+	int seg = (grave.Header.Frequence)*p/1000;	    //nombre d'échantillon dans un segment de durée p  
 
-	for(int i=0; i < grave.Header.Datasize - seg; i=i+seg)
+	for(int i=0; i < grave.Header.DataSize - seg; i=i+seg)
 	{
 		for(int j=0; j < seg; j++)
 		{
@@ -137,7 +146,7 @@ void grave8()
 
 	}  
 
-    fwrite(grave.Data, grave.Header.Datasize, 1, grave.File);
+    fwrite(grave.Data, grave.Header.DataSize, 1, grave.File);
 
 	free(buffer);
     free(grave.Data);
@@ -153,18 +162,19 @@ void grave16()
     fichier_wav grave;
     grave.File = fopen("result/grave.wav", "wb");
     grave.Header = source.Header;
-    grave.Data = (uint8_t*)malloc(grave.Header.DataSize);    
+    grave.Data = (uint16_t*)malloc((grave.Header.DataSize)*sizeof(uint16_t));    
 
+    fseek(source.File, 0, SEEK_SET);
 
     		// Duplication de chaque valeur
    
-	uint8_t* buffer = (uint8_t*)malloc(grave.Header.DataSize * 2);
+	uint16_t* buffer = (uint16_t*)malloc(grave.Header.DataSize * 2);
 
 	for(int i=0, j=0; i < grave.Header.DataSize; i++, j++)
 	{
-		buffer[j] = source.Data[i];
+		buffer[j] = (source.Data[i]);
 
- 		buffer[++j] = source.Data[i];
+ 		buffer[++j] = (source.Data[i]);
 	}
 
 
@@ -174,22 +184,32 @@ void grave16()
 
 	int p = 1;		                                // durée d'un segment en ms
 
-	int seg = grave.Header.Frequence*p/1000;	    //nombre d'échantillon dans un segment de durée p  
+	int seg = (grave.Header.Frequence)*p/1000;	    // nombre d'échantillon dans un segment de durée p  
 
-	for(int i=0; i < grave.Header.Datasize - seg; i=i+seg)
+	for(int i=0; i < grave.Header.DataSize - seg; i=i+seg)
 	{
 		for(int j=0; j < seg; j++)
 		{
-			grave.Data[j+i] = (buffer[j+i+seg+k*(seg-1)] + buffer[j+i+seg+k*(seg-1)])/2;
+			grave.Data[j+i] = (buffer[j+i+k*(seg-1)] + buffer[j+i+seg+k*(seg-1)])/2;
+
+                    if(i == 0 && j == 0)
+                    {
+                        printf("\n %i + %i = %i", buffer[j+i+k*(seg-1)], buffer[j+i+seg+k*(seg-1)], grave.Data[j+i]);            
+                    }
+
 		}
 		k++;
 
 	}  
 
-    fwrite(grave.Data, grave.Header.Datasize, 1, grave.File);
+    fseek(grave.File, 0, SEEK_SET);
+
+    fwrite(grave.Data, grave.Header.DataSize, 1, grave.File);
+
+        //fwrite(buffer, grave.Header.DataSize * 2, 1, grave.File);
 
 	free(buffer);
-    free(grave.Data);
+    //free(grave.Data);
 
 	fclose(grave.File);
 
@@ -202,12 +222,13 @@ void grave32()
     fichier_wav grave;
     grave.File = fopen("result/grave.wav", "wb");
     grave.Header = source.Header;
-    grave.Data = (uint8_t*)malloc(grave.Header.DataSize);    
+    grave.Data = (uint32_t*)malloc(grave.Header.DataSize);    
 
+    fseek(source.File, 0, SEEK_SET);
 
     		// Duplication de chaque valeur
    
-	uint8_t* buffer = (uint8_t*)malloc(grave.Header.DataSize * 2);
+	uint32_t* buffer = (uint32_t*)malloc((grave.Header.DataSize * 2)*sizeof(uint32_t));
 
 	for(int i=0, j=0; i < grave.Header.DataSize; i++, j++)
 	{
@@ -225,7 +246,7 @@ void grave32()
 
 	int seg = grave.Header.Frequence*p/1000;	    //nombre d'échantillon dans un segment de durée p  
 
-	for(int i=0; i < grave.Header.Datasize - seg; i=i+seg)
+	for(int i=0; i < grave.Header.DataSize - seg; i=i+seg)
 	{
 		for(int j=0; j < seg; j++)
 		{
@@ -235,7 +256,7 @@ void grave32()
 
 	}  
 
-    fwrite(grave.Data, grave.Header.Datasize, 1, grave.File);
+    fwrite(grave.Data, grave.Header.DataSize, 1, grave.File);
 
 	free(buffer);
     free(grave.Data);
@@ -257,7 +278,7 @@ void file_handle()
 
     source.File = fopen("sample/attention.wav", "rb");
 
-    fseek(source.File, 0, SEEK_END);
+   fseek(source.File, 0, SEEK_END);
 	file_size = ftell(source.File);
 	fseek(source.File, 0, SEEK_SET);
 
@@ -329,10 +350,15 @@ void file_handle()
 
 void slice()
 {    
-    source.Data = (uint8_t*)malloc(source.Header.DataSize);
+    source.Data = (uint16_t*)malloc(source.Header.DataSize * sizeof(uint16_t));
 
     fseek(source.File, 44, SEEK_SET);
 
     fread(source.Data, source.Header.DataSize, 1, source.File);  
+}
+
+void rebuild()
+{
+
 }
 
